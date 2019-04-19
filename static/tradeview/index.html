@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+    <title>TradingView Charting Library demo</title>
+
+    <!-- Fix for iOS Safari zooming bug -->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+    <script type="text/javascript" src="charting_library/charting_library.min.js"></script>
+    <script type="text/javascript" src="datafeeds/udf/dist/polyfills.js"></script>
+    <script type="text/javascript" src="datafeeds/udf/dist/bundle.js"></script>
+
+    <script type="text/javascript">
+
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+        function initOnReady() {
+
+            var datafeed = new Datafeeds.UDFCompatibleDatafeed("https://demo_feed.tradingview.com")
+
+            var widget = window.tvWidget = new TradingView.widget({
+                // debug: true, // uncomment this line to see Library errors and warnings in the console
+                // fullscreen: false,
+                symbol: 'A',
+                interval: "60",
+
+                width: 1180,
+                height: 600,
+
+                container_id: "tv_chart_container",
+
+                //	BEWARE: no trailing slash is expected in feed URL
+                datafeed: datafeed,
+                library_path: "charting_library/",
+                locale: getParameterByName('lang') || "zh",
+
+                // disabled_features: ["use_localstorage_for_settings"],
+                // enabled_features: ["study_templates"],
+
+                disabled_features: [
+                    "save_chart_properties_to_local_storage",
+                    "volume_force_overlay",
+                    "header_saveload",
+                    "header_symbol_search",
+                    "header_chart_type",
+                    "header_compare",
+                    "header_undo_redo",
+                    "header_indicators",
+                    "timeframes_toolbar",
+                    "countdown"
+                ],
+                enabled_features: ["study_templates"],
+
+                charts_storage_url: 'http://saveload.tradingview.com',
+                charts_storage_api_version: "1.1",
+                client_id: 'tradingview.com',
+                user_id: 'public_user_id',
+                // theme: getParameterByName('theme'),
+
+                theme: 'Dark',
+
+                // overrides: {
+                //     "paneProperties.background": "#121d32",
+                // },
+
+                toolbar_bg: "#121d32",
+
+                time_frames: [
+                    {text: "50y", resolution: "6M"},
+                    {text: "3y", resolution: "W"},
+                    {text: "8m", resolution: "D"},
+                    {text: "2m", resolution: "D"},
+                    {text: "1m", resolution: "60"},
+                    {text: "1w", resolution: "30"},
+                    {text: "7d", resolution: "30"},
+                    {text: "5d", resolution: "10"},
+                    {text: "3d", resolution: "10"},
+                    {text: "2d", resolution: "5"},
+                    {text: "1d", resolution: "5"}
+                ],
+
+                favorites: {
+                    intervals: ["1D", "3D", "3W", "W", "M"]
+                },
+
+            });
+
+            console.log(widget)
+
+            // var wsUri ="wss://real.okex.com:10442/ws/v3"
+            //
+            // var websocket = new WebSocket(wsUri)
+            //
+            // websocket.onopen = function(evt){
+            //     console.log(evt)
+            // }
+            //
+            // console.log(websocket)
+
+        };
+
+        window.addEventListener('DOMContentLoaded', initOnReady, false);
+    </script>
+
+</head>
+
+<body style="margin:0px;">
+<div id="tv_chart_container" style="width:1180px; margin: 10px auto;"></div>
+</body>
+
+</html>
