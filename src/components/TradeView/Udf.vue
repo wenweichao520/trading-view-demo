@@ -54,7 +54,7 @@
 
                     container_id: 'trade-view',
                     datafeed: this.datafeeds,
-                    library_path: '/static/tradeview/charting_library/',
+                    library_path: './static/tradeview/charting_library/',
 
                     disabled_features: [
                         "save_chart_properties_to_local_storage",
@@ -87,7 +87,6 @@
                             url: this.url
                         }
                     }).then((res) => {
-                        console.log(res)
                         const data = res.data.data
                         const list = []
                         data.forEach((element) => {
@@ -102,7 +101,6 @@
                         })
                         resolve(list)
                     }).catch((err) => {
-                        console.dir(err)
                         reject(err)
                     })
                 })
