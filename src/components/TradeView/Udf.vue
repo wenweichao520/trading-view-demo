@@ -37,7 +37,7 @@
              * 初始化axios
              */
             initAxios() {
-                this.http.defaults.baseURL = process.env.NODE_ENV == 'development' ? '/okex' : 'https://www.okex.me'
+                this.http.defaults.baseURL = 'https://bird.ioliu.cn/v2'
             },
 
             /**
@@ -45,7 +45,7 @@
              */
             initWidget() {
                 this.widget = new TvWidget({
-                    // debug: true,
+                    debug: true,
                     symbol: this.symbol,
                     interval: this.interval,
 
@@ -81,12 +81,13 @@
 
             getData() {
                 return new Promise((resolve, reject) => {
-                    this.http.get(this.url, {
+                    //解决跨域问题
+                    this.http.get('https://bird.ioliu.cn/v2', {
                         params: {
-                            granularity: `${this.toSecond(this.interval)}`,
-                            size: 1000
+                            url: this.url
                         }
                     }).then((res) => {
+                        console.log(res)
                         const data = res.data.data
                         const list = []
                         data.forEach((element) => {
@@ -101,6 +102,7 @@
                         })
                         resolve(list)
                     }).catch((err) => {
+                        console.dir(err)
                         reject(err)
                     })
                 })
@@ -245,8 +247,18 @@
                 return `${this.symbol}-${this.interval}`
             },
             url() {
-                return `/v2/spot/instruments/${this.symbol}/candles`
-                // return `/api/swap/v3/instruments/${this.symbol}-SWAP/candles`
+                const params = {
+                    granularity: `${this.toSecond(this.interval)}`,
+                    size: 1000
+                }
+                let paramStr = []
+                let baseUrl = `https://www.okex.me/v2/spot/instruments/${this.symbol}/candles`
+                for(let i in params){
+                    paramStr.push(`${i}=${params[i]}`)
+                }
+                paramStr = paramStr.join('&')
+                baseUrl += `?${paramStr}`
+                return baseUrl
             }
         },
         watch: {
