@@ -11,7 +11,7 @@ class socket {
     //     this.url = url
     // }
 
-    constructor(url = 'wss://real.okex.com:10442/ws/v3', options) {
+    constructor(url = 'wss://okexcomreal.bafang.com:10442/ws/v3'/*url = 'wss://real.okex.com:10442/ws/v3'*/, options) {
         this.heartBeatTimer = null
         this.options = options
         this.messageMap = {}

@@ -86,7 +86,7 @@ class datafeeds {
         return {
             supports_search: true,
             supports_group_request: false,
-            supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
+            supported_resolutions: ['1', '5', '15', '30', '60', '1D', '2D', '3D', '1W', '1M'],
             supports_marks: true,
             supports_timescale_marks: true,
             supports_time: true
@@ -98,7 +98,7 @@ class datafeeds {
      */
     defaultSymbol() {
         return {
-            'name': 'BTC-USD',
+            'name': 'BTCUSDT',
             'timezone': 'Asia/Shanghai',
             'minmov': 1,
             'minmov2': 0,
@@ -107,9 +107,10 @@ class datafeeds {
             'session': '24x7',
             'has_intraday': true,
             'has_no_volume': false,
-            'description': 'BTC-USD',
+            'description': 'BTCUSDT',
             'pricescale': 1,
-            'ticker': 'BTC-USD'
+            'ticker': 'BTCUSDT',
+            'supported_resolutions': ['1', '5', '15', '30', '60', '1D', '2D', '3D', '1W', '1M']
         }
     }
 }

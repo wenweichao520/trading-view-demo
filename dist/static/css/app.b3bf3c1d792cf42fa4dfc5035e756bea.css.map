@@ -1,0 +1,1 @@
+{"version":3,"sources":["app.b3bf3c1d792cf42fa4dfc5035e756bea.css"],"names":[],"mappings":"AAMA,0DACI,aAAc,AACd,gBAAkB,CACrB","file":"app.b3bf3c1d792cf42fa4dfc5035e756bea.css","sourcesContent":["\n#trade-view[data-v-6594454c] {\n    width: 1180px;\n    margin: 10px auto;\n}\n\n#trade-view[data-v-73c73970] {\n    width: 1180px;\n    margin: 10px auto;\n}\n"]}
