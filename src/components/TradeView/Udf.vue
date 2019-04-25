@@ -37,7 +37,7 @@
              * 初始化axios
              */
             initAxios() {
-                this.http.defaults.baseURL = '/okex'
+                this.http.defaults.baseURL = process.env.NODE_ENV == 'development' ? '/okex' : 'https://www.okex.me'
             },
 
             /**

@@ -76,6 +76,7 @@
 
                 if (!this.widget) {
                     this.widget = new TvWidget({
+                        // debug: true,
                         symbol: this.symbol,
                         interval: this.interval,
 
