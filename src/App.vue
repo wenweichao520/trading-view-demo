@@ -1,16 +1,16 @@
 <template>
     <div id="app">
-        <trade-view></trade-view>
+        <app-main></app-main>
     </div>
 </template>
 
 <script>
-    import TradeView from './components/TradeView/Index'
+    import AppMain from './components/Main'
 
     export default {
         name: 'App',
         components: {
-            TradeView
+            AppMain: AppMain
         }
     }
 </script>

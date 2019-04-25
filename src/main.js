@@ -2,31 +2,25 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
-
-const NotFound = {template: '<p>Page not found</p>'}
-const Home = (resolve) => require(['@/components/TradeView/Index.vue'], resolve)
-const Udf = (resolve) => require(['@/components/TradeView/Udf.vue'], resolve)
-
-const routes = {
-    '/': Home,
-    '/udf': Udf
-}
+import VueRouter from 'vue-router'
 
 Vue.config.productionTip = false
 
+Vue.use(VueRouter)
+
 /* eslint-disable no-new */
 new Vue({
-    el: '#app',
-    data: {
-        currentRoute: window.location.pathname
-    },
-    components: {App},
-    computed: {
-        ViewComponent() {
-            return routes[this.currentRoute] || NotFound
-        }
-    },
-    render(h) {
-        return h(this.ViewComponent)
-    }
-})
+    router: new VueRouter({
+        routes: [
+            {
+                path: '/',
+                component: (resolve) => require(['@/components/TradeView/Index.vue'], resolve)
+            },
+            {
+                path: '/udf',
+                component: (resolve) => require(['@/components/TradeView/Udf.vue'], resolve)
+            }
+        ]
+    }),
+    render: h => h(App)
+}).$mount('#app')
