@@ -205,6 +205,8 @@
          */
         getSymbol: function () {
             return {
+                symbol: app.symbol,
+                description: app.symbol,
                 timezone: 'Asia/Shanghai',
                 minmov: 1,
                 minmov2: 0,
@@ -214,10 +216,8 @@
                 has_intraday: true,
                 has_no_volume: false,
                 pricescale: 10,
-                ticker: 'BTC-USDT',
-                supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
-                volume_precision: 8,
-                seconds_multipliers: ["5"],
+                ticker: app.symbol,
+                supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W']
             };
         },
 
