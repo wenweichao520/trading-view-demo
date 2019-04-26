@@ -25,59 +25,73 @@
         initData: function () {
             this.getData(function (data) {
                 app.httpData[app.getTicker()] = data;
-                app.initSocket();
             });
         },
 
         initSocket: function () {
             app.socket.doOpen();
             app.socket.on('message', app.onMessage);
+            this.subscribe();
         },
 
         initWeight: function () {
-
             this.datafeeds = datafeesClass(app);
-
-            this.widget = new TradingView.widget({
-                // debug: true,
-                symbol: this.symbol,
-                interval: this.interval,
-                user_id: "public_user_id",
-                width: 1180,
-                height: 600,
-                container_id: 'trade-view',
-                datafeed: this.datafeeds,
-                library_path: '../static/tradeview/charting_library/',
-                disabled_features: [
-                    "save_chart_properties_to_local_storage",
-                    "volume_force_overlay",
-                    "header_saveload",
-                    "header_symbol_search",
-                    "header_chart_type",
-                    "header_compare",
-                    "header_undo_redo",
-                    "header_indicators",
-                    "timeframes_toolbar",
-                    "countdown"
-                ],
-                enabled_features: [
-                    "study_templates",
-                    "hide_last_na_study_output"
-                ],
-                theme: 'Dark',
-                toolbar_bg: "#121d32",
-                allow_symbol_change: !0,
-                timezone: 'Asia/Shanghai',
-                locale: 'zh'
-            });
-
+            this.widget = new TradingView.widget(this.getWidgetConfig());
+            //图表加载完成事件
             this.widget.onChartReady(function () {
+
                 var widget = this.activeChart();
-                //当时间颗粒变化，则触发改变
-                widget.onIntervalChanged().subscribe(null, function (interval, obj) {
+
+                //开启订阅K线
+                app.initSocket();
+
+                /*widget.onIntervalChanged().subscribe(null, function(interval, obj) {
                     widget.resetData();
                     app.interval = interval;
                     app.initData();
+                })*/
+
+                //初始化头部按钮
+                app.initHeaderBar(widget);
+            });
+        },
+
+        /**
+         * 初始化头部工具栏
+         */
+        initHeaderBar: function (widget) {
+
+            //选择时间粒度
+            $('.k-toolbar-wrap').find('.collect ul').children('li').each(function (k, v) {
+
+                var li = $(v);
+                var value = li.data('value');
+
+                li.removeClass('true');
+
+                if (value == app.interval) {
+                    li.removeClass('true').addClass('selected');
+                } else {
+                    li.removeClass('selected').addClass('true');
+                }
+
+                console.log(widget);
+
+                li.click(function () {
+                    var interval = $(this).data('value');
+
+                    widget.setResolution(interval, function(){
+                        console.log(arguments)
+                    });
+
+                    // console.log(interval)
+                    // console.log(app.interval)
+                    // if(interval != app.interval){
+                    //     app.interval = interval;
+                    //     $(this).addClass('selected').siblings('li').removeClass('selected').addClass('true');
+                    //     widget.resetData();
+                    //     app.initData();
+                    // }
                 });
             });
 
@@ -125,16 +139,15 @@
 
                 var ticker = app.getTicker();
 
-                if (app.httpData[ticker] && app.httpData[ticker].length) {
-                    var dataLen = app.httpData[ticker].length
-                    var lastBar = app.httpData[ticker][dataLen - 1]
-                    if (barsData.time >= lastBar.time) {
-                        app.httpData[ticker][dataLen - 1] = barsData;
-                    }
-                }
+                app.httpData[ticker].push(barsData);
             }
         },
 
+        /**
+         * 获取socket调用参数
+         * @param interval
+         * @returns {string[]}
+         */
         getArgs(interval) {
             const symbol = this.symbol
             interval = interval ? interval : this.interval
@@ -159,14 +172,19 @@
             return parseInt(minute) * 60;
         },
 
+        /**
+         * 数据块处理
+         * @param symbolInfo
+         * @param resolution
+         * @param rangeStartDate
+         * @param rangeEndDate
+         * @param onLoadedCallback
+         */
         getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback) {
             if (this.interval !== resolution) this.unSubscribe(this.interval);
 
             //赋值时间粒度
             this.interval = resolution;
-
-            //http获取数据之后，订阅socket
-            this.subscribe();
 
             var ticker = app.getTicker();
 
@@ -184,6 +202,49 @@
                     app.getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback);
                 }, 10);
             }
+        },
+
+        /**
+         * 获取widght配置
+         */
+        getWidgetConfig: function () {
+            return {
+                // debug: true,
+                symbol: this.symbol,
+                interval: this.interval,
+                user_id: "public_user_id",
+                width: 1180,
+                height: 600,
+                container_id: 'trade-view',
+                datafeed: this.datafeeds,
+                custom_css_url: './../../../css/custom.css',
+                library_path: '../static/tradeview/charting_library/',
+                disabled_features: [
+                    "save_chart_properties_to_local_storage",
+                    "volume_force_overlay",
+                    "header_saveload",
+                    "header_symbol_search",
+                    "header_chart_type",
+                    "header_compare",
+                    "header_undo_redo",
+                    "header_indicators",
+                    "timeframes_toolbar",
+                    "countdown",
+                    "header_widget",
+                    "caption_buttons_text_if_possible"
+                ],
+                enabled_features: [
+                    "study_templates",
+                    "hide_last_na_study_output"
+                ],
+                theme: 'Dark',
+                allow_symbol_change: !0,
+                timezone: 'Asia/Shanghai',
+                locale: 'zh',
+                overrides: {
+                    "paneProperties.background": "#121d32",
+                }
+            };
         },
 
         /**
@@ -217,7 +278,8 @@
                 has_no_volume: false,
                 pricescale: 10,
                 ticker: app.symbol,
-                supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W']
+                supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
+                volume_precision: 8
             };
         },
 

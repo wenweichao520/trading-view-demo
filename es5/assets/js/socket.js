@@ -12,7 +12,9 @@ function socketClass(options) {
 
         socket: null,
 
-        url: 'wss://okexcomreal.bafang.com:10442/ws/v3',
+        // url: 'wss://okexcomreal.bafang.com:10442/ws/v3',
+
+        url: 'wss://real.okex.com:10442/ws/v3',
 
         doOpen: function () {
             var self = this
@@ -39,7 +41,7 @@ function socketClass(options) {
 
         onOpen: function (evt) {
             this.connState = 2
-            this.heartBeatTimer = setInterval(this.checkHeartbeat.bind(this), 20000)
+            // this.heartBeatTimer = setInterval(this.checkHeartbeat.bind(this), 20000)
             this.onReceiver({Event: 'open'})
         },
 
