@@ -1,8 +1,6 @@
 ## 使用es5语法开发
 
-```
 地址：This is an [https://jungle-leung.github.io/trading-view-demo/es5](https://jungle-leung.github.io/trading-view-demo/es5 "https://jungle-leung.github.io/trading-view-demo/es5"). 
-```
 
 ## 使用vue打包（基于es6语法开发）
 
