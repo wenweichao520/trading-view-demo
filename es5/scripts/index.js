@@ -17,7 +17,6 @@
         getBarTimer: null,
 
         init: function () {
-            this.httpData[this.getTicker()] = [];
             this.initWeight();
             this.initData();
         },
@@ -75,24 +74,21 @@
                     li.removeClass('selected').addClass('true');
                 }
 
-                console.log(widget);
-
                 li.click(function () {
-                    var interval = $(this).data('value');
-
-                    widget.setResolution(interval, function(){
-                        console.log(arguments)
-                    });
-
-                    // console.log(interval)
-                    // console.log(app.interval)
-                    // if(interval != app.interval){
-                    //     app.interval = interval;
-                    //     $(this).addClass('selected').siblings('li').removeClass('selected').addClass('true');
-                    //     widget.resetData();
-                    //     app.initData();
-                    // }
+                    var interval = $(this).data('value').toString();
+                    if(interval != app.interval){
+                        $(this).addClass('selected').siblings('li').removeClass('selected').addClass('true');
+                        app.interval = interval;
+                        app.initData();
+                        widget.setResolution(interval);
+                    }
                 });
+            });
+
+            //技术指标
+            $('.technical-indicator').click(function(){
+                console.log(widget)
+                widget.setVisible(false);
             });
 
         },
