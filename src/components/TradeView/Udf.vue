@@ -45,7 +45,7 @@
              */
             initWidget() {
                 this.widget = new TvWidget({
-                    debug: true,
+                    // debug: true,
                     symbol: this.symbol,
                     interval: this.interval,
 
