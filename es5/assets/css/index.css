@@ -1,10 +1,45 @@
-#trade-view {
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.trading-view-container {
     width: 1180px;
     margin: 0px auto;
 }
 
-.k-toolbar-wrap {
+.trading-view-container.fullscreen {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.trading-view-container.fullscreen .k-toolbar-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.trading-view-container.fullscreen .trading-view-main {
+    position: fixed;
+    top: 36px;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 600px;
+}
+
+.trading-view-main {
     width: 1180px;
+    height: 600px;
+}
+
+.k-toolbar-wrap {
     margin: 10px auto 0px auto;
     height: 36px;
     overflow: hidden;

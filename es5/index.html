@@ -13,43 +13,51 @@
     <link rel="stylesheet" type="text/css" href="./assets/css/index.css">
 </head>
 <body>
-<div class="k-toolbar-wrap">
-    <div class="k-toolbar dark">
-        <div class="periods">
-            <div class="collect">
-                <ul>
-                    <li data-value="1"><span>1分钟</span></li>
-                    <li data-value="3"><span>3分钟</span></li>
-                    <li data-value="5"><span>5分钟</span></li>
-                    <li data-value="15"><span>15分钟</span></li>
-                    <li data-value="30"><span>30分钟</span></li>
-                    <li data-value="60"><span>1小时</span></li>
-                    <li data-value="120"><span>2小时</span></li>
-                    <li data-value="240"><span>4小时</span></li>
-                    <li data-value="360"><span>6小时</span></li>
-                    <li data-value="720"><span>12小时</span></li>
-                    <li data-value="1D"><span>1日</span></li>
-                    <li data-value="1W"><span>1周</span></li>
-                    </li>
-                </ul>
+
+    <h1>全屏参照，不必理会</h1>
+
+    <div class="trading-view-container">
+        <div class="k-toolbar-wrap">
+            <div class="k-toolbar dark">
+                <div class="periods">
+                    <div class="collect">
+                        <ul>
+                            <li data-value="1"><span>1分钟</span></li>
+                            <li data-value="3"><span>3分钟</span></li>
+                            <li data-value="5"><span>5分钟</span></li>
+                            <li data-value="15"><span>15分钟</span></li>
+                            <li data-value="30"><span>30分钟</span></li>
+                            <li data-value="60"><span>1小时</span></li>
+                            <li data-value="120"><span>2小时</span></li>
+                            <li data-value="240"><span>4小时</span></li>
+                            <li data-value="360"><span>6小时</span></li>
+                            <li data-value="720"><span>12小时</span></li>
+                            <li data-value="1D"><span>1日</span></li>
+                            <li data-value="1W"><span>1周</span></li>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="border-line"></div>
+                </div>
+                <div class="technical-indicator icon-button">
+                    <li title="技术指标"><i class="iconfont icon-zhibiaozhuanqu"></i></li>
+                </div>
+                <div class="screenshot icon-button">
+                    <li title="屏幕快照"><i class="iconfont icon-Icon-Photo"></i></li>
+                </div>
+                <div class="setting icon-button">
+                    <li title="设置"><i class="iconfont icon-menu-administration"></i></li>
+                </div>
+                <div class="fullscreen icon-button">
+                    <li class="" title="全屏"><i class="iconfont icon-fullscreen2"></i></li>
+                </div>
             </div>
-            <div class="border-line"></div>
         </div>
-        <div class="technical-indicator icon-button">
-            <li title="技术指标"><i class="iconfont icon-zhibiaozhuanqu"></i></li>
-        </div>
-        <div class="screenshot icon-button">
-            <li title="屏幕快照"><i class="iconfont icon-Icon-Photo"></i></li>
-        </div>
-        <div class="setting icon-button">
-            <li title="设置"><i class="iconfont icon-menu-administration"></i></li>
-        </div>
-        <div class="fullscreen icon-button">
-            <li class="" title="全屏"><i class="iconfont icon-fullscreen2"></i></li>
-        </div>
+        <div id="trade-view" class="trading-view-main"></div>
     </div>
-</div>
-<div id="trade-view"></div>
+
+    <h1>全屏参照，不必理会</h1>
+
 </body>
 
 <script src="./scripts/index.js"></script>

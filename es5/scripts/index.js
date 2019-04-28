@@ -86,9 +86,42 @@
             });
 
             //技术指标
-            $('.technical-indicator').click(function(){
+            $('.k-toolbar .technical-indicator').click(function(){
+                console.log(app.widget)
                 console.log(widget)
-                widget.setVisible(false);
+                widget.executeActionById('insertIndicator');
+            });
+
+            //截图
+            $('.k-toolbar .screenshot').click(function(){
+                app.widget.takeScreenshot();
+            });
+
+            //设置
+            $('.k-toolbar .setting').click(function(){
+                widget.executeActionById('chartProperties');
+            });
+
+            //全屏
+            $('.k-toolbar .fullscreen').click(function(){
+                var i = $(this).find('.iconfont');
+                var li = $(this).children('li');
+                if(i.hasClass('icon-fullscreen2')){
+
+                    //计算高度
+                    var height = $(window).height() - $('.k-toolbar-wrap').height();
+                    $('.trading-view-main').attr({
+                        style: 'height: ' + height + 'px'
+                    });
+
+                    li.attr('title', '退出全屏');
+                    i.removeClass('icon-fullscreen2').addClass('icon-exitfullscreen1');
+                }else{
+                    $('.trading-view-main').removeAttr('style');
+                    li.attr('title', '全屏');
+                    i.removeClass('icon-exitfullscreen1').addClass('icon-fullscreen2');
+                }
+                $('.trading-view-container').toggleClass('fullscreen');
             });
 
         },
@@ -209,8 +242,8 @@
                 symbol: this.symbol,
                 interval: this.interval,
                 user_id: "public_user_id",
-                width: 1180,
-                height: 600,
+                fullscreen: false,
+                autosize: true,
                 container_id: 'trade-view',
                 datafeed: this.datafeeds,
                 custom_css_url: './../../../css/custom.css',
@@ -234,7 +267,6 @@
                     "hide_last_na_study_output"
                 ],
                 theme: 'Dark',
-                allow_symbol_change: !0,
                 timezone: 'Asia/Shanghai',
                 locale: 'zh',
                 overrides: {
@@ -262,6 +294,7 @@
          */
         getSymbol: function () {
             return {
+                exchange: "BTCS",
                 symbol: app.symbol,
                 description: app.symbol,
                 timezone: 'Asia/Shanghai',

@@ -197,7 +197,7 @@
     color: rgba(255,255,255, 0.65);
 }
 .chart-page [class^="menuWrap-"] [class*="isActive-"] {
-    background-color: rgba(87,149,241,0.04) !important;
+    /*background-color: rgba(87,149,241,0.04) !important;*/
     color: #5795F1;
 }
 .chart-page [class^="labelRow-"], .chart-page [class^="icon-"] {
@@ -310,7 +310,7 @@
     height: 42px;
 }
 .chart-page ._tv-dialog ._tv-dialog-content .properties-tabs a {
-    padding-top: 15px;
+    /*padding-top: 15px;*/
     height: 41px;
 }
 .chart-page ._tv-dialog ._tv-dialog-content .dialog-buttons {
