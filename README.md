@@ -1,7 +1,7 @@
-## 使用es5语法开发
+## Javascript示例
 
-预览地址：[https://jungle-leung.github.io/trading-view-demo/es5](https://jungle-leung.github.io/trading-view-demo/es5)
+预览地址：[https://jungle-leung.github.io/trading-view-demo/example/javascript](https://jungle-leung.github.io/trading-view-demo/example/javascript)
 
-## 使用vue打包（基于es6语法开发）
+## Vue示例
 
-预览地址：[https://jungle-leung.github.io/trading-view-demo/dist/#/udf](https://jungle-leung.github.io/trading-view-demo/dist/#/udf)
+预览地址：[https://jungle-leung.github.io/trading-view-demo/example/vue](https://jungle-leung.github.io/trading-view-demo/example/vue)
