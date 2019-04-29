@@ -1,6 +1,6 @@
 ## 原生Javascript示例
 
-预览地址：[https://jungle-leung.github.io/trading-view-demo/dist/javascript](https://jungle-leung.github.io/trading-view-demo/dist/javascript)
+预览地址：[https://jungle-leung.github.io/trading-view-demo/dist/javascript/index.html](https://jungle-leung.github.io/trading-view-demo/dist/javascript/index.html)
 
 ## Vue示例
 
