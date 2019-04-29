@@ -14,11 +14,11 @@ new Vue({
         routes: [
             {
                 path: '/',
-                component: (resolve) => require(['@/components/TradeView/Index.vue'], resolve)
+                component: (resolve) => require(['@/views/Index.vue'], resolve)
             },
             {
                 path: '/udf',
-                component: (resolve) => require(['@/components/TradeView/Udf.vue'], resolve)
+                component: (resolve) => require(['@/views/Udf.vue'], resolve)
             }
         ]
     }),

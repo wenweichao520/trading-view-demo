@@ -41,6 +41,8 @@
 
                 var widget = this.activeChart();
 
+                // $('.trading-view-container').removeClass('hide');
+
                 //开启订阅K线
                 app.initSocket();
 
@@ -246,7 +248,7 @@
                 autosize: true,
                 container_id: 'trade-view',
                 datafeed: this.datafeeds,
-                custom_css_url: './../../../css/custom.css',
+                custom_css_url: '../../assets/css/custom.css',
                 library_path: '../static/tradeview/charting_library/',
                 disabled_features: [
                     "save_chart_properties_to_local_storage",

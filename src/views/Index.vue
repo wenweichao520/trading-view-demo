@@ -5,8 +5,8 @@
 
 <script>
     import {widget as TvWidget} from '@/../static/tradeview/charting_library/charting_library.min.js'
-    import socket from './datafeeds/socket.js'
-    import datafeeds from './datafeeds/datafees.js'
+    import socket from '../utils/datafeeds/socket.js'
+    import datafeeds from '../utils/datafeeds/datafees.js'
     import moment from 'moment'
     import axios from 'axios'
 
@@ -175,25 +175,6 @@
                 }
             },
             getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback) {
-
-                // console.log(symbolInfo)
-
-                // console.log(' >> :', rangeStartDate, rangeEndDate)
-
-                // console.log(resolution)
-                // console.log('*******************')
-                // console.log(moment(rangeStartDate * 1000).format() + ' ~ ' + moment(rangeEndDate * 1000).format())
-                // console.log('*******************')
-
-                // if (this.interval !== resolution) {
-                //     this.unSubscribe(this.interval)
-                //     this.interval = resolution
-                //     this.sendMessage({
-                //         op: 'subscribe',
-                //         args: this.getArgs()
-                //     })
-                // }
-
                 const ticker = `${this.symbol}-${this.interval}`
                 if (this.cacheData[ticker] && this.cacheData[ticker].length) {
                     this.isLoading = false

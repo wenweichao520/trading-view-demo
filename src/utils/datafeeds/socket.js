@@ -75,11 +75,11 @@ class socket {
     }
 
     checkHeartbeat() {
-        const data = {
-            'cmd': 'ping',
-            'args': [Date.parse(new Date())]
-        }
-        this.send(data)
+        // const data = {
+        //     'cmd': 'ping',
+        //     'args': [Date.parse(new Date())]
+        // }
+        // this.send(data)
     }
 
     onError(err) {
