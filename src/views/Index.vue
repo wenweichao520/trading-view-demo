@@ -305,7 +305,7 @@
                     container_id: 'trade-view',
                     datafeed: this.datafeeds,
                     custom_css_url: '../../assets/css/custom.css',
-                    library_path: '../static/tradeview/charting_library/',
+                    library_path: '../../static/tradeview/charting_library/',
                     disabled_features: [
                         "save_chart_properties_to_local_storage",
                         "volume_force_overlay",
