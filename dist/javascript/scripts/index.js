@@ -62,6 +62,46 @@
          */
         initHeaderBar: function (widget) {
 
+            //下拉菜单
+            $('.dropdown ul li').each(function (k, v) {
+                var value = $(v).data('value');
+                var symbol = value.replace(/\//g, '-');
+                if(symbol == app.symbol) {
+                    $(v).addClass('selected');
+                    $('.coin-list').find('.title').text(value);
+                }
+
+                $(v).click(function(){
+                    var value = $(this).data('value');
+                    var symbol = value.replace(/\//g, '-');
+                    $(this).addClass('selected').siblings('li').removeClass('selected');
+                    $('.coin-list').find('.title').text(value);
+
+                    //取消订阅
+                    app.unSubscribe(app.interval);
+
+                    app.symbol = symbol;
+                    app.initData();
+                    widget.setSymbol(symbol, function () {
+                        //重新订阅
+                        app.subscribe();
+                    });
+                });
+            });
+            $('.coin-list').mouseover(function(){
+                $(this).find('.dropdown').removeClass('hide');
+                $(this).find('.arrow span').css({
+                    "transition-duration": "0.5s",
+                    "transform": "rotate(180deg)"
+                });
+            }).mouseout(function(){
+                $(this).find('.dropdown').addClass('hide');
+                $(this).find('.arrow span').css({
+                    "transition-duration": "0.5s",
+                    "transform": "rotate(0deg)"
+                });
+            });
+
             //选择时间粒度
             $('.k-toolbar-wrap').find('.collect ul').children('li').each(function (k, v) {
 
@@ -161,10 +201,10 @@
 
                 var barsData = {
                     time: parseInt(moment(_data.candle[0]).format('x')),
-                    open: _data.candle[1],
-                    high: _data.candle[2],
-                    low: _data.candle[3],
-                    close: _data.candle[4],
+                    open: parseFloat(_data.candle[1]),
+                    high: parseFloat(_data.candle[2]),
+                    low: parseFloat(_data.candle[3]),
+                    close: parseFloat(_data.candle[4]),
                     volume: parseFloat(_data.candle[5])
                 }
 
@@ -307,10 +347,10 @@
                 session: '24x7',
                 has_intraday: true,
                 has_no_volume: false,
-                pricescale: 10,
+                pricescale: 1e4,
                 ticker: app.symbol,
                 supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
-                volume_precision: 8
+                volume_precision: 8,
             };
         },
 
@@ -332,10 +372,10 @@
                     for (var i in _data) {
                         data.push({
                             time: parseInt(moment(_data[i][0]).format('x')),
-                            open: _data[i][1],
-                            high: _data[i][2],
-                            low: _data[i][3],
-                            close: _data[i][4],
+                            open: parseFloat(_data[i][1]),
+                            high: parseFloat(_data[i][2]),
+                            low: parseFloat(_data[i][3]),
+                            close: parseFloat(_data[i][4]),
                             volume: parseFloat(_data[i][5])
                         })
                     }

@@ -26,6 +26,7 @@ body {
     margin: 0;
     padding: 0;
     width: 100%;
+    z-index: 2;
 }
 
 .trading-view-container.fullscreen .trading-view-main {
@@ -36,6 +37,7 @@ body {
     padding: 0;
     width: 100%;
     height: 600px;
+    z-index: 1;
 }
 
 .trading-view-main {
@@ -45,12 +47,32 @@ body {
 
 .k-toolbar-wrap {
     margin: 10px auto 0px auto;
-    height: 36px;
-    overflow: hidden;
+    /*height: 36px;*/
+    /*overflow: hidden;*/
     color: hsla(0, 0%, 100%, .85);
     background: #121d32;
     border-bottom: 1px solid #0c172d;
     font-size: 12px;
+}
+
+.k-toolbar .coin-list {
+    height: 100%;
+    margin: 0 5px;
+}
+
+.k-toolbar .coin-list .dropdown {
+    width: 98px;
+    top: 35px;
+    left: 4px;
+}
+
+.k-toolbar .coin-list .dropdown li{
+    height: 34px;
+}
+
+.k-toolbar .coin-list .title{
+    line-height: 34px;
+    cursor: pointer;
 }
 
 .k-toolbar .icon {

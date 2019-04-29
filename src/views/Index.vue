@@ -5,6 +5,27 @@
         <div class="trading-view-container" :class="headerBar.isFullscreen ? 'fullscreen' : ''">
             <div class="k-toolbar-wrap" ref="toolbar">
                 <div class="k-toolbar dark">
+
+                    <div class="coin-list" @mouseover="onArrowMouseover" @mouseout="onArrowMouseout">
+                        <div class="dropdown" :class="coinListCfg.isDropdown ? '' : 'hide'">
+                            <ul>
+                                <li v-for="item in coinList"
+                                    :class="item.replace(/\//g, '-') == symbol ? 'selected' : ''"
+                                    @click="onClickSymbol(item)"><span>{{item}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="title">{{symbol.replace(/\-/g, '/')}}</div>
+                        <li class="arrow">
+                            <span
+                                :style="coinListCfg.isDropdown ? {'transition-duration': '0.5s', 'transform': 'rotate(180deg)'} : {'transition-duration': '0.5s', 'transform': 'rotate(0deg)'}">
+                                <i class="iconfont icon-kline-down"></i>
+                            </span>
+                        </li>
+                    </div>
+
+                    <div class="border-line"></div>
+
                     <div class="periods">
                         <div class="collect">
                             <ul>
@@ -32,7 +53,8 @@
                     </div>
                 </div>
             </div>
-            <div id="trade-view" class="trading-view-main" :style="headerBar.isFullscreen ? {height: viewHeight + 'px'} : {}"></div>
+            <div id="trade-view" class="trading-view-main"
+                 :style="headerBar.isFullscreen ? {height: viewHeight + 'px'} : {}"></div>
         </div>
 
         <h1>全屏参照，不必理会</h1>
@@ -63,6 +85,17 @@
                     fullscreenText: '全屏',
                     fullscreenClass: 'icon-fullscreen2'
                 },
+                coinListCfg: {
+                    isDropdown: false
+                },
+                coinList: [
+                    "BTC/USDT",
+                    "LTC/USDT",
+                    "ETH/USDT",
+                    "BCH/USDT",
+                    "EOS/USDT",
+                    "BSV/USDT"
+                ],
                 intervalData: [
                     {
                         value: '1', name: '1分钟'
@@ -133,6 +166,28 @@
                 })
             },
 
+            onArrowMouseover() {
+                this.coinListCfg.isDropdown = true
+            },
+
+            onArrowMouseout() {
+                this.coinListCfg.isDropdown = false
+            },
+
+            onClickSymbol(symbol) {
+                symbol = symbol.replace(/\//g, '-')
+
+                //取消订阅
+                this.unSubscribe(this.interval)
+
+                this.symbol = symbol
+                this.initData()
+                this.activeChart.setSymbol(symbol, () => {
+                    //重新订阅
+                    this.subscribe()
+                })
+            },
+
             /**
              * 更改interval
              */
@@ -193,10 +248,10 @@
                         data.forEach((element) => {
                             list.push({
                                 time: parseInt(moment(element[0]).format('x')),
-                                open: element[1],
-                                high: element[2],
-                                low: element[3],
-                                close: element[4],
+                                open: parseFloat(element[1]),
+                                high: parseFloat(element[2]),
+                                low: parseFloat(element[3]),
+                                close: parseFloat(element[4]),
                                 volume: parseFloat(element[5])
                             })
                         })
@@ -235,10 +290,10 @@
                     this.datafeeds.barsUpdater.updateData()
                     const barsData = {
                         time: parseInt(moment(_data.candle[0]).format('x')),
-                        open: _data.candle[1],
-                        high: _data.candle[2],
-                        low: _data.candle[3],
-                        close: _data.candle[4],
+                        open: parseFloat(_data.candle[1]),
+                        high: parseFloat(_data.candle[2]),
+                        low: parseFloat(_data.candle[3]),
+                        close: parseFloat(_data.candle[4]),
                         volume: parseFloat(_data.candle[5])
                     }
                     this.httpData[this.ticker].push(barsData)
@@ -363,7 +418,7 @@
                     session: '24x7',
                     has_intraday: true,
                     has_no_volume: false,
-                    pricescale: 10,
+                    pricescale: 1e4,
                     ticker: this.symbol,
                     supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
                     volume_precision: 8
