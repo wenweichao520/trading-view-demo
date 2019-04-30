@@ -4,225 +4,66 @@
 
         datafeeds: null,
 
-        socket: socketClass(),
-
-        symbol: "BTC-USDT",
-
-        interval: 1,
-
         httpData: {},
 
         widget: null,
 
+        activeChart: null,
+
         getBarTimer: null,
 
-        init: function () {
-            this.initWeight();
-            this.initData();
+        get interval() {
+            if (!this.activeChart) return 1;
+            return this.activeChart.resolution();
         },
 
+        get symbol() {
+            if (!this.activeChart) return "BTC-USDT";
+            return this.activeChart.symbol();
+        },
+
+        /**
+         * 初始化
+         */
+        init: function () {
+            this.initWeight();
+        },
+
+        /**
+         * 初始化数据
+         */
         initData: function () {
-            this.getData(function (data) {
-                app.httpData[app.getTicker()] = data;
+            this.http.getData(function (data) {
+                app.httpData[app.ticker] = data;
             });
         },
 
-        initSocket: function () {
-            app.socket.doOpen();
-            app.socket.on('message', app.onMessage);
-            this.subscribe();
-        },
-
+        /**
+         * 初始化widght
+         * @param callback
+         */
         initWeight: function () {
-            this.datafeeds = datafeesClass(app);
-            this.widget = new TradingView.widget(this.getWidgetConfig());
+
+            this.initData();
+
+            this.datafeeds = datafeesClass(app._datafeeds);
+
+            this.widget = new TradingView.widget(this.options);
+
             //图表加载完成事件
             this.widget.onChartReady(function () {
 
                 var widget = this.activeChart();
 
-                // $('.trading-view-container').removeClass('hide');
+                app.activeChart = widget;
 
-                //开启订阅K线
-                app.initSocket();
-
-                /*widget.onIntervalChanged().subscribe(null, function(interval, obj) {
-                    widget.resetData();
-                    app.interval = interval;
-                    app.initData();
-                })*/
+                //开启socket
+                app._socket.init();
 
                 //初始化头部按钮
-                app.initHeaderBar(widget);
-            });
-        },
-
-        /**
-         * 初始化头部工具栏
-         */
-        initHeaderBar: function (widget) {
-
-            //下拉菜单
-            $('.dropdown ul li').each(function (k, v) {
-                var value = $(v).data('value');
-                var symbol = value.replace(/\//g, '-');
-                if(symbol == app.symbol) {
-                    $(v).addClass('selected');
-                    $('.coin-list').find('.title').text(value);
-                }
-
-                $(v).click(function(){
-                    var value = $(this).data('value');
-                    var symbol = value.replace(/\//g, '-');
-                    $(this).addClass('selected').siblings('li').removeClass('selected');
-                    $('.coin-list').find('.title').text(value);
-
-                    //取消订阅
-                    app.unSubscribe(app.interval);
-
-                    app.symbol = symbol;
-                    app.initData();
-                    widget.setSymbol(symbol, function () {
-                        //重新订阅
-                        app.subscribe();
-                    });
-                });
-            });
-            $('.coin-list').mouseover(function(){
-                $(this).find('.dropdown').removeClass('hide');
-                $(this).find('.arrow span').css({
-                    "transition-duration": "0.5s",
-                    "transform": "rotate(180deg)"
-                });
-            }).mouseout(function(){
-                $(this).find('.dropdown').addClass('hide');
-                $(this).find('.arrow span').css({
-                    "transition-duration": "0.5s",
-                    "transform": "rotate(0deg)"
-                });
+                app.headerBar.init();
             });
 
-            //选择时间粒度
-            $('.k-toolbar-wrap').find('.collect ul').children('li').each(function (k, v) {
-
-                var li = $(v);
-                var value = li.data('value');
-
-                li.removeClass('true');
-
-                if (value == app.interval) {
-                    li.removeClass('true').addClass('selected');
-                } else {
-                    li.removeClass('selected').addClass('true');
-                }
-
-                li.click(function () {
-                    var interval = $(this).data('value').toString();
-                    if(interval != app.interval){
-                        $(this).addClass('selected').siblings('li').removeClass('selected').addClass('true');
-                        app.interval = interval;
-                        app.initData();
-                        widget.setResolution(interval);
-                    }
-                });
-            });
-
-            //技术指标
-            $('.k-toolbar .technical-indicator').click(function(){
-                console.log(app.widget)
-                console.log(widget)
-                widget.executeActionById('insertIndicator');
-            });
-
-            //截图
-            $('.k-toolbar .screenshot').click(function(){
-                app.widget.takeScreenshot();
-            });
-
-            //设置
-            $('.k-toolbar .setting').click(function(){
-                widget.executeActionById('chartProperties');
-            });
-
-            //全屏
-            $('.k-toolbar .fullscreen').click(function(){
-                var i = $(this).find('.iconfont');
-                var li = $(this).children('li');
-                if(i.hasClass('icon-fullscreen2')){
-
-                    //计算高度
-                    var height = $(window).height() - $('.k-toolbar-wrap').height();
-                    $('.trading-view-main').attr({
-                        style: 'height: ' + height + 'px'
-                    });
-
-                    li.attr('title', '退出全屏');
-                    i.removeClass('icon-fullscreen2').addClass('icon-exitfullscreen1');
-                }else{
-                    $('.trading-view-main').removeAttr('style');
-                    li.attr('title', '全屏');
-                    i.removeClass('icon-exitfullscreen1').addClass('icon-fullscreen2');
-                }
-                $('.trading-view-container').toggleClass('fullscreen');
-            });
-
-        },
-
-        sendMessage(data) {
-            if (app.socket.checkOpen()) {
-                app.socket.send(data)
-            } else {
-                app.socket.on('open', function () {
-                    app.socket.send(data)
-                })
-            }
-        },
-
-        unSubscribe(interval) {
-            app.sendMessage({
-                "op": "unsubscribe",
-                "args": app.getArgs(interval)
-            })
-        },
-
-        subscribe() {
-            app.sendMessage({
-                "op": "subscribe",
-                "args": app.getArgs()
-            })
-        },
-
-        onMessage(data) {
-            //socket获取数据后追加到http数据的数组中
-            if (data.data && data.data.length > 0) {
-                var _data = data.data[data.data.length - 1];
-
-                app.datafeeds.barsUpdater.updateData();
-
-                var barsData = {
-                    time: parseInt(moment(_data.candle[0]).format('x')),
-                    open: parseFloat(_data.candle[1]),
-                    high: parseFloat(_data.candle[2]),
-                    low: parseFloat(_data.candle[3]),
-                    close: parseFloat(_data.candle[4]),
-                    volume: parseFloat(_data.candle[5])
-                }
-
-                var ticker = app.getTicker();
-
-                app.httpData[ticker].push(barsData);
-            }
-        },
-
-        /**
-         * 获取socket调用参数
-         * @param interval
-         * @returns {string[]}
-         */
-        getArgs(interval) {
-            const symbol = this.symbol
-            interval = interval ? interval : this.interval
-            return ["spot/candle" + this.toSecond(interval) + "s:" + symbol]
         },
 
         /**
@@ -244,41 +85,39 @@
         },
 
         /**
-         * 数据块处理
-         * @param symbolInfo
-         * @param resolution
-         * @param rangeStartDate
-         * @param rangeEndDate
-         * @param onLoadedCallback
+         * 设置时间
+         * @param interval
          */
-        getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback) {
-            if (this.interval !== resolution) this.unSubscribe(this.interval);
+        setInterval(interval) {
+            this._socket.unSubscribe();//取消订阅
+            this.activeChart.setResolution(interval);
+            this.initData();
+            this._socket.subscribe();//重新订阅
+        },
 
-            //赋值时间粒度
-            this.interval = resolution;
+        /**
+         * 设置商品
+         * @param symbol
+         */
+        setSymbol(symbol) {
+            this._socket.unSubscribe();//取消订阅
+            this.activeChart.setSymbol(symbol);
+            this.initData();
+            this._socket.subscribe();//重新订阅
+        },
 
-            var ticker = app.getTicker();
-
-            if (this.httpData[ticker] && this.httpData[ticker].length) {
-                var newBars = [];
-                var data = this.httpData[ticker];
-                for (var i in data) {
-                    if (data[i].time >= rangeStartDate * 1000 && data[i].time <= rangeEndDate * 1000) {
-                        newBars.push(data[i]);
-                    }
-                }
-                onLoadedCallback(newBars);
-            } else {
-                this.getBarTimer = setTimeout(function () {
-                    app.getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback);
-                }, 10);
-            }
+        /**
+         * 获取ticker
+         * @returns {string}
+         */
+        get ticker() {
+            return this.symbol + "-" + this.interval;
         },
 
         /**
          * 获取widght配置
          */
-        getWidgetConfig: function () {
+        get options() {
             return {
                 // debug: true,
                 symbol: this.symbol,
@@ -318,97 +157,320 @@
         },
 
         /**
-         * 默认配置
+         * socket方法
          */
-        getConfig: function () {
-            return {
-                supports_search: true,
-                supports_group_request: false,
-                supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
-                supports_marks: true,
-                supports_timescale_marks: true,
-                supports_time: true
-            };
-        },
+        _socket: {
 
-        /**
-         * 默认商品信息
-         */
-        getSymbol: function () {
-            return {
-                exchange: "BTCS",
-                symbol: app.symbol,
-                description: app.symbol,
-                timezone: 'Asia/Shanghai',
-                minmov: 1,
-                minmov2: 0,
-                pointvalue: 1,
-                fractional: false,
-                session: '24x7',
-                has_intraday: true,
-                has_no_volume: false,
-                pricescale: 1e4,
-                ticker: app.symbol,
-                supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
-                volume_precision: 8,
-            };
-        },
+            self: socketClass(),
 
-        /**
-         * 获取数据
-         * @returns {Array}
-         */
-        getData(callback) {
-            $.ajax({
-                url: 'https://bird.ioliu.cn/v2',
-                data: {
-                    url: this.getUrl()
-                },
-                dataType: 'JSON',
-                type: 'GET',
-                success: function (res) {
-                    var _data = res.data;
-                    var data = [];
-                    for (var i in _data) {
-                        data.push({
-                            time: parseInt(moment(_data[i][0]).format('x')),
-                            open: parseFloat(_data[i][1]),
-                            high: parseFloat(_data[i][2]),
-                            low: parseFloat(_data[i][3]),
-                            close: parseFloat(_data[i][4]),
-                            volume: parseFloat(_data[i][5])
-                        })
-                    }
-                    callback(data);
+            init: function () {
+                this.self.doOpen();
+                this.self.on('message', this.onMessage);
+                this.subscribe();
+            },
+
+            sendMessage(data) {
+                var _this = this;
+                if (this.self.checkOpen()) {
+                    this.self.send(data)
+                } else {
+                    this.self.on('open', function () {
+                        _this.self.send(data)
+                    })
                 }
-            });
-        },
+            },
 
-        /**
-         * 获取url
-         * @returns {string}
-         */
-        getUrl() {
-            var params = {
-                granularity: this.toSecond(this.interval),
-                size: 1000
-            };
-            var paramStr = [];
-            var baseUrl = "https://www.okex.me/v2/spot/instruments/" + this.symbol + "/candles";
-            for (var i in params) {
-                paramStr.push(i + "=" + params[i]);
+            unSubscribe() {
+                this.sendMessage({
+                    "op": "unsubscribe",
+                    "args": this.args
+                })
+            },
+
+            subscribe() {
+                this.sendMessage({
+                    "op": "subscribe",
+                    "args": this.args
+                })
+            },
+
+            onMessage(data) {
+                //socket获取数据后追加到http数据的数组中
+                if (data.data && data.data.length > 0) {
+                    var _data = data.data[data.data.length - 1];
+
+                    app.datafeeds.barsUpdater.updateData();
+
+                    var barsData = {
+                        time: parseInt(moment(_data.candle[0]).format('x')),
+                        open: parseFloat(_data.candle[1]),
+                        high: parseFloat(_data.candle[2]),
+                        low: parseFloat(_data.candle[3]),
+                        close: parseFloat(_data.candle[4]),
+                        volume: parseFloat(_data.candle[5])
+                    };
+
+                    if (typeof app.httpData[app.ticker] == 'object') {
+                        app.httpData[app.ticker].push(barsData);
+                    }
+                }
+            },
+
+            /**
+             * 获取socket调用参数
+             * @param interval
+             * @returns {string[]}
+             */
+            get args() {
+                return ["spot/candle" + app.toSecond(app.interval) + "s:" + app.symbol]
             }
-            paramStr = paramStr.join('&');
-            baseUrl += "?" + paramStr;
-            return baseUrl;
+
         },
 
         /**
-         * 获取ticker
-         * @returns {string}
+         * datafeed方法
          */
-        getTicker() {
-            return this.symbol + "-" + this.interval;
+        _datafeeds: {
+
+            /**
+             * 默认配置
+             */
+            getConfig: function () {
+                return {
+                    supports_search: true,
+                    supports_group_request: false,
+                    supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
+                    supports_marks: true,
+                    supports_timescale_marks: true,
+                    supports_time: true
+                };
+            },
+
+            /**
+             * 默认商品信息
+             */
+            getSymbol: function () {
+                return {
+                    exchange: "BTCS",
+                    symbol: app.symbol,
+                    description: app.symbol,
+                    timezone: 'Asia/Shanghai',
+                    minmov: 1,
+                    minmov2: 0,
+                    pointvalue: 1,
+                    fractional: false,
+                    session: '24x7',
+                    has_intraday: true,
+                    has_no_volume: false,
+                    pricescale: 1e4,
+                    ticker: app.symbol,
+                    supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '720', '1D', '1W'],
+                    volume_precision: 8,
+                };
+            },
+
+            /**
+             * 数据块处理
+             * @param symbolInfo
+             * @param resolution
+             * @param rangeStartDate
+             * @param rangeEndDate
+             * @param onLoadedCallback
+             */
+            getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback) {
+                var ticker = app.ticker;
+                if (app.httpData[ticker] && app.httpData[ticker].length) {
+                    var newBars = [];
+                    var data = app.httpData[ticker];
+                    for (var i in data) {
+                        if (data[i].time >= rangeStartDate * 1000 && data[i].time <= rangeEndDate * 1000) {
+                            newBars.push(data[i]);
+                        }
+                    }
+                    onLoadedCallback(newBars);
+                } else {
+                    var self = this;
+                    app.getBarTimer = setTimeout(function () {
+                        self.getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback);
+                    }, 10);
+                }
+            }
+
+        },
+
+        /**
+         * 头部工具栏方法
+         */
+        headerBar: {
+
+            init: function () {
+                for (var i in this) {
+                    if (i != 'init') this[i]();
+                }
+            },
+
+            /**
+             * 下拉菜单方法
+             */
+            dropdown: function () {
+                $('.dropdown ul li').each(function (k, v) {
+                    var value = $(v).data('value');
+                    var symbol = value.replace(/\//g, '-');
+                    if (symbol == app.symbol) {
+                        $(v).addClass('selected');
+                        $('.coin-list').find('.title').text(value);
+                    }
+
+                    $(v).click(function () {
+                        var value = $(this).data('value');
+                        var symbol = value.replace(/\//g, '-');
+                        $(this).addClass('selected').siblings('li').removeClass('selected');
+                        $('.coin-list').find('.title').text(value);
+                        app.setSymbol(symbol);
+                    });
+                });
+                $('.coin-list').mouseover(function () {
+                    $(this).find('.dropdown').removeClass('hide');
+                    $(this).find('.arrow span').css({
+                        "transition-duration": "0.5s",
+                        "transform": "rotate(180deg)"
+                    });
+                }).mouseout(function () {
+                    $(this).find('.dropdown').addClass('hide');
+                    $(this).find('.arrow span').css({
+                        "transition-duration": "0.5s",
+                        "transform": "rotate(0deg)"
+                    });
+                });
+            },
+
+            /**
+             * 时间筛选
+             */
+            periods: function () {
+                $('.k-toolbar-wrap').find('.collect ul').children('li').each(function (k, v) {
+
+                    var li = $(v);
+                    var value = li.data('value');
+
+                    li.removeClass('true');
+
+                    if (value == app.interval) {
+                        li.removeClass('true').addClass('selected');
+                    } else {
+                        li.removeClass('selected').addClass('true');
+                    }
+
+                    li.stop().click(function () {
+                        var interval = $(this).data('value').toString();
+                        if (interval != app.interval) {
+                            $(this).addClass('selected').siblings('li').removeClass('selected').addClass('true');
+                            app.setInterval(interval);
+                        }
+                    });
+                });
+            },
+
+            /**
+             * 技术指标
+             */
+            indicator: function () {
+                $('.k-toolbar .technical-indicator').click(function () {
+                    app.activeChart.executeActionById('insertIndicator');
+                });
+            },
+
+            /**
+             * 截图
+             */
+            screenshot: function () {
+                $('.k-toolbar .screenshot').click(function () {
+                    app.widget.takeScreenshot();
+                });
+            },
+
+            /**
+             * 设置
+             */
+            setting: function () {
+                $('.k-toolbar .setting').click(function () {
+                    app.activeChart.executeActionById('chartProperties');
+                });
+            },
+
+            /**
+             * 全屏
+             */
+            fullscreen: function () {
+                $('.k-toolbar .fullscreen').click(function () {
+                    var i = $(this).find('.iconfont');
+                    var li = $(this).children('li');
+                    if (i.hasClass('icon-fullscreen2')) {
+                        //计算高度
+                        var height = $(window).height() - $('.k-toolbar-wrap').height();
+                        $('.trading-view-main').attr({
+                            style: 'height: ' + height + 'px'
+                        });
+
+                        li.attr('title', '退出全屏');
+                        i.removeClass('icon-fullscreen2').addClass('icon-exitfullscreen1');
+                    } else {
+                        $('.trading-view-main').removeAttr('style');
+                        li.attr('title', '全屏');
+                        i.removeClass('icon-exitfullscreen1').addClass('icon-fullscreen2');
+                    }
+                    $('.trading-view-container').toggleClass('fullscreen');
+                });
+            }
+
+        },
+
+        /**
+         * http操作方法
+         */
+        http: {
+
+            getUrl: function () {
+                var params = {
+                    granularity: app.toSecond(app.interval),
+                    size: 1000
+                };
+                var paramStr = [];
+                var baseUrl = "https://www.okex.me/v2/spot/instruments/" + app.symbol + "/candles";
+                for (var i in params) {
+                    paramStr.push(i + "=" + params[i]);
+                }
+                paramStr = paramStr.join('&');
+                baseUrl += "?" + paramStr;
+                return baseUrl;
+            },
+
+            getData: function (callback) {
+                var baseUrl = this.getUrl();
+                $.ajax({
+                    url: 'https://bird.ioliu.cn/v2',
+                    data: {
+                        url: baseUrl
+                    },
+                    dataType: 'JSON',
+                    type: 'GET',
+                    success: function (res) {
+                        var _data = res.data;
+                        var data = [];
+                        for (var i in _data) {
+                            data.push({
+                                time: parseInt(moment(_data[i][0]).format('x')),
+                                open: parseFloat(_data[i][1]),
+                                high: parseFloat(_data[i][2]),
+                                low: parseFloat(_data[i][3]),
+                                close: parseFloat(_data[i][4]),
+                                volume: parseFloat(_data[i][5])
+                            })
+                        }
+                        callback(data);
+                    }
+                });
+            }
         }
 
     };

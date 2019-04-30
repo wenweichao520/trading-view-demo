@@ -29,7 +29,8 @@
                     <div class="periods">
                         <div class="collect">
                             <ul>
-                                <li v-for="item in intervalData" :key="item.value" @click="onHeaderInterval(item.value)"
+                                <li v-for="item in intervalData" :key="item.value"
+                                    @click="onHeaderInterval(item.value)"
                                     :class="interval == item.value ? 'selected' : 'true'">
                                     <span>{{item.name}}</span>
                                 </li>
@@ -73,8 +74,6 @@
             return {
                 datafeeds: new datafeeds(this),
                 socket: new socket(),
-                symbol: "BTC-USDT",
-                interval: 1,
                 httpData: {},
                 widget: null,
                 getBarTimer: null,
@@ -138,7 +137,6 @@
         },
         mounted() {
             this.initWidget()
-            this.initData()
         },
         methods: {
 
@@ -157,12 +155,13 @@
              * 初始化图表
              */
             initWidget() {
-                this.widget = new TvWidget(this.getWidgetConfig())
+                this.initData()
+                this.widget = new TvWidget(this.options)
                 //图表加载完成事件
                 this.widget.onChartReady(() => {
                     const widget = this.widget.activeChart()
-                    this.initSocket()//开启订阅K线
                     this.activeChart = widget//初始化头部按钮
+                    this.initSocket()//开启订阅K线
                 })
             },
 
@@ -176,16 +175,12 @@
 
             onClickSymbol(symbol) {
                 symbol = symbol.replace(/\//g, '-')
-
-                //取消订阅
-                this.unSubscribe(this.interval)
-
-                this.symbol = symbol
-                this.initData()
-                this.activeChart.setSymbol(symbol, () => {
-                    //重新订阅
+                if(symbol != this.symbol){
+                    this.unSubscribe()
+                    this.activeChart.setSymbol(symbol)
+                    this.initData()
                     this.subscribe()
-                })
+                }
             },
 
             /**
@@ -193,9 +188,10 @@
              */
             onHeaderInterval(interval) {
                 if (interval != this.interval) {
-                    this.interval = interval
-                    this.initData()
+                    this.unSubscribe()
                     this.activeChart.setResolution(interval)
+                    this.initData()
+                    this.subscribe()
                 }
             },
 
@@ -263,24 +259,25 @@
             },
 
             sendMessage(data) {
+                const self = this
                 if (this.socket.checkOpen()) {
                     this.socket.send(data)
                 } else {
                     this.socket.on('open', () => {
-                        this.socket.send(data)
+                        self.socket.send(data)
                     })
                 }
             },
-            unSubscribe(interval) {
+            unSubscribe() {
                 this.sendMessage({
                     "op": "unsubscribe",
-                    "args": this.getArgs(interval)
+                    "args": this.args
                 })
             },
             subscribe() {
                 this.sendMessage({
                     "op": "subscribe",
-                    "args": this.getArgs()
+                    "args": this.args
                 })
             },
             onMessage(data) {
@@ -296,16 +293,13 @@
                         close: parseFloat(_data.candle[4]),
                         volume: parseFloat(_data.candle[5])
                     }
-                    this.httpData[this.ticker].push(barsData)
+                    if (typeof this.httpData[this.ticker] == 'object') {
+                        this.httpData[this.ticker].push(barsData)
+                    }
                 }
             },
 
             getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback) {
-                if (this.interval !== resolution) this.unSubscribe(this.interval)
-
-                //赋值时间粒度
-                this.interval = resolution
-
                 if (this.httpData[this.ticker] && this.httpData[this.ticker].length) {
                     const newBars = []
                     this.httpData[this.ticker].forEach(item => {
@@ -320,12 +314,6 @@
                         self.getBars(symbolInfo, resolution, rangeStartDate, rangeEndDate, onLoadedCallback)
                     }, 10)
                 }
-            },
-
-            getArgs(interval) {
-                const symbol = this.symbol
-                interval = interval ? interval : this.interval
-                return [`spot/candle${this.toSecond(interval)}s:${symbol}`]
             },
 
             /**
@@ -344,48 +332,6 @@
                     return parseInt(week) * 7 * 24 * 60 * 60
                 }
                 return parseInt(minute) * 60
-            },
-
-            /**
-             * 获取widght配置
-             */
-            getWidgetConfig() {
-                return {
-                    // debug: true,
-                    symbol: this.symbol,
-                    interval: this.interval,
-                    user_id: "public_user_id",
-                    fullscreen: false,
-                    autosize: true,
-                    container_id: 'trade-view',
-                    datafeed: this.datafeeds,
-                    custom_css_url: '../../assets/css/custom.css',
-                    library_path: '../../static/tradeview/charting_library/',
-                    disabled_features: [
-                        "save_chart_properties_to_local_storage",
-                        "volume_force_overlay",
-                        "header_saveload",
-                        "header_symbol_search",
-                        "header_chart_type",
-                        "header_compare",
-                        "header_undo_redo",
-                        "header_indicators",
-                        "timeframes_toolbar",
-                        "countdown",
-                        "header_widget",
-                        "caption_buttons_text_if_possible"
-                    ],
-                    enabled_features: [
-                        "study_templates",
-                        "hide_last_na_study_output"
-                    ],
-                    theme: 'Dark',
-                    timezone: 'Asia/Shanghai',
-                    locale: 'zh',
-                    overrides: {
-                        "paneProperties.background": "#121d32",
-                    }
-                };
             },
 
             /**
@@ -426,6 +372,55 @@
             }
         },
         computed: {
+            options() {
+                return {
+                    // debug: true,
+                    symbol: this.symbol,
+                    interval: this.interval,
+                    user_id: "public_user_id",
+                    fullscreen: false,
+                    autosize: true,
+                    container_id: 'trade-view',
+                    datafeed: this.datafeeds,
+                    custom_css_url: '../../assets/css/custom.css',
+                    library_path: '../../static/tradeview/charting_library/',
+                    disabled_features: [
+                        "save_chart_properties_to_local_storage",
+                        "volume_force_overlay",
+                        "header_saveload",
+                        "header_symbol_search",
+                        "header_chart_type",
+                        "header_compare",
+                        "header_undo_redo",
+                        "header_indicators",
+                        "timeframes_toolbar",
+                        "countdown",
+                        "header_widget",
+                        "caption_buttons_text_if_possible"
+                    ],
+                    enabled_features: [
+                        "study_templates",
+                        "hide_last_na_study_output"
+                    ],
+                    theme: 'Dark',
+                    timezone: 'Asia/Shanghai',
+                    locale: 'zh',
+                    overrides: {
+                        "paneProperties.background": "#121d32",
+                    }
+                };
+            },
+            interval() {
+                if (!this.activeChart) return 1
+                return this.activeChart.resolution()
+            },
+            symbol() {
+                if (!this.activeChart) return "BTC-USDT"
+                return this.activeChart.symbol()
+            },
+            args() {
+                return [`spot/candle${this.toSecond(this.interval)}s:${this.symbol}`]
+            },
             ticker() {
                 return `${this.symbol}-${this.interval}`
             },
@@ -442,11 +437,6 @@
                 paramStr = paramStr.join('&')
                 baseUrl += `?${paramStr}`
                 return baseUrl
-            }
-        },
-        watch: {
-            async interval() {
-                this.httpData[this.ticker] = await this.getData()
             }
         }
     }
