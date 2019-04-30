@@ -1,4 +1,4 @@
-(function () {
+(function (callback) {
 
     var app = {
 
@@ -475,9 +475,10 @@
 
     };
 
+    return callback(app);
+    
+})(function(app){
     $(function () {
         app.init();
     });
-
-    return app;
-})();
+});
