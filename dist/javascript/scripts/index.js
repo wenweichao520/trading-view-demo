@@ -35,6 +35,7 @@
         initData: function () {
             this.http.getData(function (data) {
                 app.httpData[app.ticker] = data;
+                app._socket.init();//开启socket
             });
         },
 
@@ -56,9 +57,6 @@
                 var widget = this.activeChart();
 
                 app.activeChart = widget;
-
-                //开启socket
-                app._socket.init();
 
                 //初始化头部按钮
                 app.headerBar.init();
@@ -476,7 +474,7 @@
     };
 
     return callback(app);
-    
+
 })(function(app){
     $(function () {
         app.init();

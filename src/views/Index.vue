@@ -143,6 +143,7 @@
             async initData() {
                 const data = await this.getData()
                 this.httpData[this.ticker] = data
+                this.initSocket()//开启订阅K线
             },
 
             initSocket() {
@@ -161,7 +162,6 @@
                 this.widget.onChartReady(() => {
                     const widget = this.widget.activeChart()
                     this.activeChart = widget//初始化头部按钮
-                    this.initSocket()//开启订阅K线
                 })
             },
 
