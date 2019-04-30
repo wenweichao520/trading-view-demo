@@ -90,7 +90,6 @@
             this._socket.unSubscribe();//取消订阅
             this.activeChart.setResolution(interval);
             this.initData();
-            this._socket.subscribe();//重新订阅
         },
 
         /**
@@ -101,7 +100,6 @@
             this._socket.unSubscribe();//取消订阅
             this.activeChart.setSymbol(symbol);
             this.initData();
-            this._socket.subscribe();//重新订阅
         },
 
         /**

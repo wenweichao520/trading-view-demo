@@ -179,7 +179,6 @@
                     this.unSubscribe()
                     this.activeChart.setSymbol(symbol)
                     this.initData()
-                    this.subscribe()
                 }
             },
 
@@ -191,7 +190,6 @@
                     this.unSubscribe()
                     this.activeChart.setResolution(interval)
                     this.initData()
-                    this.subscribe()
                 }
             },
 
