@@ -476,5 +476,6 @@
 })(function(app){
     $(function () {
         app.init();
+        
     });
 });
